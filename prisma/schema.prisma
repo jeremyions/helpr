@@ -1,0 +1,190 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CLIENT
+  HELPER
+  ADMIN
+}
+
+enum ServiceCategory {
+  CLEANING
+  AGED_CARE
+  BABYSITTING
+  DOG_WALKING
+  ACCOUNTING
+  OTHER
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  role          UserRole  @default(CLIENT)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Profile relations
+  helperProfile  HelperProfile?
+  clientProfile  ClientProfile?
+  
+  // Common relations
+  accounts       Account[]
+  sessions       Session[]
+  sentMessages   Message[]    @relation("SentMessages")
+  receivedMessages Message[]  @relation("ReceivedMessages")
+  reviews        Review[]     @relation("ReviewAuthor")
+  receivedReviews Review[]    @relation("ReviewTarget")
+}
+
+model HelperProfile {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio           String?
+  categories    ServiceCategory[]
+  hourlyRate    Float?
+  availability  Json?     // Stored as structured JSON
+  certifications Json?    // Array of certification objects
+  location      Json?     // Coordinates and address
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  services      Service[]
+  bookings      Booking[] @relation("HelperBookings")
+}
+
+model ClientProfile {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  preferences   Json?     // Stored as structured JSON
+  location      Json?     // Coordinates and address
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  bookings      Booking[] @relation("ClientBookings")
+}
+
+model Service {
+  id            String    @id @default(cuid())
+  helperId      String
+  helper        HelperProfile @relation(fields: [helperId], references: [id])
+  category      ServiceCategory
+  title         String
+  description   String
+  price         Float
+  duration      Int      // in minutes
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  bookings      Booking[]
+}
+
+model Booking {
+  id            String    @id @default(cuid())
+  serviceId     String
+  service       Service   @relation(fields: [serviceId], references: [id])
+  helperId      String
+  helper        HelperProfile @relation("HelperBookings", fields: [helperId], references: [id])
+  clientId      String
+  client        ClientProfile @relation("ClientBookings", fields: [clientId], references: [id])
+  startTime     DateTime
+  endTime       DateTime
+  status        String    // PENDING, CONFIRMED, COMPLETED, CANCELLED
+  totalAmount   Float
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  payment       Payment?
+  review        Review?
+}
+
+model Payment {
+  id            String    @id @default(cuid())
+  bookingId     String    @unique
+  booking       Booking   @relation(fields: [bookingId], references: [id])
+  amount        Float
+  currency      String    @default("AUD")
+  status        String    // PENDING, COMPLETED, FAILED, REFUNDED
+  stripePaymentId String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Review {
+  id            String    @id @default(cuid())
+  bookingId     String    @unique
+  booking       Booking   @relation(fields: [bookingId], references: [id])
+  authorId      String
+  author        User      @relation("ReviewAuthor", fields: [authorId], references: [id])
+  targetId      String
+  target        User      @relation("ReviewTarget", fields: [targetId], references: [id])
+  rating        Int
+  comment       String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Message {
+  id            String    @id @default(cuid())
+  content       String
+  senderId      String
+  sender        User      @relation("SentMessages", fields: [senderId], references: [id])
+  receiverId    String
+  receiver      User      @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  read          Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// NextAuth.js Models
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
