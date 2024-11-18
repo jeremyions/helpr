@@ -30,9 +30,13 @@ const bottomNavItems = [
   { name: 'Settings', icon: Settings, href: '/settings' },
 ]
 
-export default function Sidebar() {
+interface SidebarProps {
+  isCollapsed: boolean;
+  onToggle: () => void;
+}
+
+export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   const pathname = usePathname()
-  const [isCollapsed, setIsCollapsed] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
 
   return (
@@ -46,7 +50,7 @@ export default function Sidebar() {
       <div className="flex flex-col h-full text-white p-4">
         {/* Collapse Button */}
         <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
+          onClick={onToggle}
           className="absolute -right-3 top-8 bg-white p-1 rounded-full shadow-lg
                      hover:scale-110 transition-transform duration-200"
         >
