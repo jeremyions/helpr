@@ -3,32 +3,45 @@
 import { Inter } from 'next/font/google'
 import './globals.css'
 import Sidebar from '@/components/Sidebar'
-import { useState } from 'react'
+import { SidebarProvider } from '@/context/SidebarContext'
+import { useSidebar } from '@/context/SidebarContext'
+import { cn } from '@/lib/utils'
 
 const inter = Inter({ subsets: ['latin'] })
+
+function MainLayout({ children }: { children: React.ReactNode }) {
+  const { isCollapsed } = useSidebar()
+  
+  return (
+    <div className="flex min-h-screen bg-gray-50">
+      <Sidebar />
+      <main 
+        className={cn(
+          "flex-1 transition-all duration-300 ease-in-out",
+          isCollapsed ? "ml-20" : "ml-64"
+        )}
+      >
+        <div className="h-full w-full">
+          {children}
+        </div>
+      </main>
+    </div>
+  )
+}
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
-
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="flex min-h-screen">
-          <Sidebar 
-            isCollapsed={isSidebarCollapsed} 
-            onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
-          />
-          <main className={`
-            flex-1 transition-all duration-300
-            ${isSidebarCollapsed ? 'ml-20' : 'ml-64'}
-          `}>
+        <SidebarProvider>
+          <MainLayout>
             {children}
-          </main>
-        </div>
+          </MainLayout>
+        </SidebarProvider>
       </body>
     </html>
   )

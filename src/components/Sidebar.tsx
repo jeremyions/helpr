@@ -1,202 +1,149 @@
 'use client'
 
-import { 
-  User, 
-  Briefcase, 
-  HandHeart, 
-  HelpCircle, 
-  Settings, 
-  Users, 
-  Calendar,
-  Bell,
-  LogOut,
-  ChevronLeft,
-  Home
-} from 'lucide-react'
-import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import Link from 'next/link'
+import { cn } from '@/lib/utils'
+import { useSidebar } from '@/context/SidebarContext'
+import { 
+  HeartHandshake, 
+  Search,
+  MessageSquare,
+  Calendar,
+  CreditCard,
+  Settings,
+  User,
+  ChevronLeft,
+  Briefcase,
+  Users
+} from 'lucide-react'
 
-const navItems = [
-  { name: 'Get a Helpr', icon: HandHeart, href: '/find-help' },
-  { name: 'Home', icon: Home, href: '/' },
-  { name: 'Jobs Available', icon: Briefcase, href: '/jobs' },
-  { name: 'Community', icon: Users, href: '/community' },
-  { name: 'Upcoming Events', icon: Calendar, href: '/events' },
+const mainLinks = [
+  {
+    name: 'Get a Helpr',
+    href: '/find-help',
+    icon: Search
+  },
+  {
+    name: 'Jobs Available',
+    href: '/jobs',
+    icon: Briefcase
+  },
+  {
+    name: 'Community',
+    href: '/community',
+    icon: Users
+  },
+  {
+    name: 'Messages',
+    href: '/messages',
+    icon: MessageSquare
+  },
+  {
+    name: 'Bookings',
+    href: '/bookings',
+    icon: Calendar
+  },
+  {
+    name: 'Invoices',
+    href: '/invoices',
+    icon: CreditCard
+  },
+  {
+    name: 'Profile',
+    href: '/profile',
+    icon: User
+  },
+  {
+    name: 'Settings',
+    href: '/settings',
+    icon: Settings
+  }
 ]
 
-const bottomNavItems = [
-  { name: 'Profile', icon: User, href: '/profile' },
-  { name: 'Settings', icon: Settings, href: '/settings' },
-]
-
-interface SidebarProps {
-  isCollapsed: boolean;
-  onToggle: () => void;
-}
-
-export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
+export default function Sidebar() {
+  const { isCollapsed, setIsCollapsed } = useSidebar()
   const pathname = usePathname()
-  const [showNotifications, setShowNotifications] = useState(false)
 
   return (
-    <aside 
-      className={`
-        fixed left-0 top-0 h-screen bg-gradient-to-b from-pink to-yellow/50
-        transition-all duration-300 ease-in-out z-50
-        ${isCollapsed ? 'w-20' : 'w-64'}
-      `}
-    >
-      <div className="flex flex-col h-full text-white p-4">
-        {/* Collapse Button */}
-        <button
-          onClick={onToggle}
-          className="absolute -right-3 top-8 bg-white p-1 rounded-full shadow-lg
-                     hover:scale-110 transition-transform duration-200"
-        >
-          <ChevronLeft className={`h-4 w-4 text-pink transition-transform duration-300
-            ${isCollapsed ? 'rotate-180' : ''}`} 
-          />
-        </button>
-
+    <div className="relative">
+      <aside 
+        className={cn(
+          "fixed left-0 top-0 h-screen bg-gradient-to-b from-pink to-yellow/50 transition-all duration-300 ease-in-out",
+          isCollapsed ? "w-20" : "w-64"
+        )}
+      >
         {/* Logo */}
-        <div className="mb-8 flex items-center">
-          <h1 className={`text-2xl font-bold transition-all duration-300
-            ${isCollapsed ? 'scale-0 w-0' : 'scale-100 w-auto'}`}>
-            Helpr
-          </h1>
-        </div>
+        <Link 
+          href="/" 
+          className={cn(
+            "flex items-center p-3 mb-1",
+            isCollapsed ? "justify-center" : "justify-start"
+          )}
+        >
+          <div className="text-white">
+            <HeartHandshake className="h-10 w-10" />
+          </div>
+          {!isCollapsed && (
+            <span className="ml-2 text-2xl font-bold text-white">
+              Helpr
+            </span>
+          )}
+        </Link>
 
-        {/* Main Navigation */}
-        <nav className="flex-1 space-y-2">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href
-            const Icon = item.icon
-            
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`
-                  flex items-center gap-3 px-4 py-3 rounded-lg transition-all
-                  hover:bg-white/10 group relative
-                  ${isActive ? 'bg-white/20' : ''}
-                `}
-              >
-                <Icon className={`h-5 w-5 transition-transform duration-200
-                  ${isCollapsed ? 'scale-110' : ''}`} 
-                />
-                <span className={`whitespace-nowrap transition-all duration-300
-                  ${isCollapsed ? 'opacity-0 w-0' : 'opacity-100'}`}>
-                  {item.name}
-                </span>
-                
-                {/* Tooltip for collapsed state */}
-                {isCollapsed && (
-                  <div className="absolute left-full ml-2 px-2 py-1 bg-white text-pink
-                                rounded-md opacity-0 group-hover:opacity-100 transition-opacity
-                                whitespace-nowrap shadow-lg">
-                    {item.name}
-                  </div>
-                )}
-              </Link>
-            )
-          })}
-        </nav>
+        {/* Navigation Links */}
+        <nav className="flex-1 px-2">
+          <ul className="space-y-0.5">
+            {mainLinks.map((link) => {
+              const Icon = link.icon
+              const isActive = pathname === link.href
 
-        {/* Bottom Navigation and Profile Section */}
-        <div className="mt-auto pt-4 border-t border-white/20">
-          {/* Bottom Nav Items */}
-          <div className="space-y-2 mb-4">
-            {bottomNavItems.map((item) => {
-              const isActive = pathname === item.href
-              const Icon = item.icon
-              
               return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`
-                    flex items-center gap-3 px-4 py-3 rounded-lg transition-all
-                    hover:bg-white/10 group relative
-                    ${isActive ? 'bg-white/20' : ''}
-                  `}
-                >
-                  <Icon className={`h-5 w-5 transition-transform duration-200
-                    ${isCollapsed ? 'scale-110' : ''}`} 
-                  />
-                  <span className={`whitespace-nowrap transition-all duration-300
-                    ${isCollapsed ? 'opacity-0 w-0' : 'opacity-100'}`}>
-                    {item.name}
-                  </span>
-                  
-                  {/* Tooltip for collapsed state */}
-                  {isCollapsed && (
-                    <div className="absolute left-full ml-2 px-2 py-1 bg-white text-pink
-                                  rounded-md opacity-0 group-hover:opacity-100 transition-opacity
-                                  whitespace-nowrap shadow-lg">
-                      {item.name}
-                    </div>
-                  )}
-                </Link>
+                <li key={link.name}>
+                  <Link
+                    href={link.href}
+                    className={cn(
+                      "flex items-center rounded-lg transition-colors relative group",
+                      isCollapsed ? "justify-center px-3 py-3" : "px-4 py-3",
+                      isActive 
+                        ? "bg-white/20 text-white" 
+                        : "text-white hover:bg-white/10 hover:text-white"
+                    )}
+                  >
+                    <Icon className="h-6 w-6 flex-shrink-0" />
+                    {!isCollapsed && (
+                      <span className="ml-3 text-lg font-medium">
+                        {link.name}
+                      </span>
+                    )}
+                    {isCollapsed && (
+                      <div className="absolute left-full ml-2 px-2 py-1 bg-white text-pink rounded-md 
+                                    opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap
+                                    pointer-events-none z-50 text-lg">
+                        {link.name}
+                      </div>
+                    )}
+                  </Link>
+                </li>
               )
             })}
-          </div>
+          </ul>
+        </nav>
 
-          {/* Notifications */}
-          <div className="mb-4">
-            <button
-              onClick={() => setShowNotifications(!showNotifications)}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg
-                         hover:bg-white/10 transition-all relative group"
-            >
-              <Bell className="h-5 w-5" />
-              <span className={`transition-all duration-300
-                ${isCollapsed ? 'opacity-0 w-0' : 'opacity-100'}`}>
-                Notifications
-              </span>
-              <span className="absolute top-2 right-2 w-2 h-2 bg-yellow rounded-full" />
-              
-              {/* Notification dropdown */}
-              {showNotifications && !isCollapsed && (
-                <div className="absolute bottom-full left-0 w-full mb-2 bg-white
-                              rounded-lg shadow-lg p-4 text-gray-800">
-                  <div className="space-y-2">
-                    <p className="text-sm">New message from Sarah</p>
-                    <p className="text-sm">Booking confirmed for tomorrow</p>
-                  </div>
-                </div>
-              )}
-            </button>
-          </div>
-
-          {/* User Profile */}
-          <div className="flex items-center gap-3 px-4 py-3 rounded-lg
-                         hover:bg-white/10 transition-all cursor-pointer">
-            <div className="w-10 h-10 rounded-full bg-white/90 flex items-center 
-                          justify-center flex-shrink-0 hover:scale-110 transition-transform">
-              <User className="h-6 w-6 text-pink" />
-            </div>
-            <div className={`transition-all duration-300 overflow-hidden
-              ${isCollapsed ? 'w-0' : 'w-auto'}`}>
-              <p className="font-medium">John Doe</p>
-              <p className="text-sm text-white/80">Premium Member</p>
-            </div>
-          </div>
-
-          {/* Logout Button */}
-          <button className={`
-            mt-2 w-full flex items-center gap-3 px-4 py-3 rounded-lg
-            hover:bg-white/10 transition-all text-white/80 hover:text-white
-          `}>
-            <LogOut className="h-5 w-5" />
-            <span className={`transition-all duration-300
-              ${isCollapsed ? 'opacity-0 w-0' : 'opacity-100'}`}>
-              Logout
-            </span>
-          </button>
-        </div>
-      </div>
-    </aside>
+        {/* Toggle Button */}
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="absolute -right-3 top-8 z-50 bg-white p-1.5 rounded-full shadow-md hover:shadow-lg
+                     hover:scale-110 active:scale-95 transition-all duration-200"
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          <ChevronLeft 
+            className={cn(
+              "h-4 w-4 text-pink transition-transform duration-300",
+              isCollapsed && "rotate-180"
+            )} 
+          />
+        </button>
+      </aside>
+    </div>
   )
 }
