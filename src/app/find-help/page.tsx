@@ -1,30 +1,26 @@
 'use client'
 
-import AIChatInterface from '@/components/AIChatInterface'
-import { Search, Sparkles, Star, Heart, TrendingUp } from 'lucide-react'
 import { useState } from 'react'
+import { Search, TrendingUp } from 'lucide-react'
+import AIChatInterface from '@/components/AIChatInterface'
 
 const popularSearches = [
-  {
-    text: "Lawn Mowing",
-    trend: "↗ 25% this week"
-  },
-  {
-    text: "Chiropractor",
-    trend: "Popular in your area"
-  },
-  {
-    text: "Home Loan",
-    trend: "Trending now"
-  },
-  {
-    text: "Real Estate Agent",
-    trend: "High demand"
-  },
-  {
-    text: "Insurance",
-    trend: "↗ 15% this week"
-  }
+  { text: "Dog Whisperer", trend: "Trending with pet owners" },
+  { text: "Plant Doctor", trend: "Popular among millennials" },
+  { text: "Life Coach", trend: "↗ 45% this month" },
+  { text: "Tech Wizard", trend: "High demand" },
+  { text: "Yoga Master", trend: "Morning favorite" },
+  { text: "Party Planner", trend: "Weekend trending" },
+  { text: "Home Chef", trend: "Dinner time favorite" },
+  { text: "Math Tutor", trend: "Exam season peak" },
+  { text: "Guitar Teacher", trend: "Rising star" },
+  { text: "Moving Helper", trend: "End of month rush" },
+  { text: "Meditation Guide", trend: "Mental health focus" },
+  { text: "Garden Guru", trend: "Spring sensation" },
+  { text: "Fashion Stylist", trend: "Style upgrade trend" },
+  { text: "Fitness Coach", trend: "New year popular" },
+  { text: "Language Tutor", trend: "Global connection" },
+  { text: "DIY Expert", trend: "Weekend warrior pick" }
 ]
 
 export default function FindHelp() {
@@ -41,15 +37,14 @@ export default function FindHelp() {
   return (
     <div className="h-full min-h-screen bg-gradient-to-b from-pink-light to-white p-8">
       <div className="container mx-auto px-4">
-        <div className={`max-w-4xl mx-auto text-center space-y-6 flex flex-col justify-center ${showChat ? 'min-h-[40vh]' : 'min-h-[80vh]'} transition-all duration-500`}>
+        <div className="max-w-4xl mx-auto text-center space-y-6 flex flex-col">
           <div className="space-y-4">
             <h1 className="text-7xl font-extrabold tracking-tight">
               <span className="block text-gray-800">
                 Find Your
               </span>
               <span className="bg-gradient-to-r from-pink via-purple-500 to-yellow 
-                             bg-clip-text text-transparent 
-                             animate-gradient-x">
+                             bg-clip-text text-transparent">
                 Superhero Helper
               </span>
             </h1>
@@ -58,49 +53,54 @@ export default function FindHelp() {
               Every task has its perfect match. Let's find yours!
             </p>
 
-            {/* Floating Icons */}
-            <div className="relative h-12 w-full">
-              <div className="absolute left-1/4 animate-float-slow opacity-70">
-                <Sparkles className="h-8 w-8 text-pink" />
-              </div>
-              <div className="absolute left-1/2 animate-float-slower opacity-70">
-                <Star className="h-8 w-8 text-yellow" />
-              </div>
-              <div className="absolute right-1/4 animate-float-slowest opacity-70">
-                <Heart className="h-8 w-8 text-pink" />
+            <div className="max-w-2xl mx-auto">
+              <div className={`relative bg-white rounded-[30px] transition-all duration-500 ease-out
+                             border-2 border-gray-200 hover:border-pink
+                             ${showChat ? 'h-[650px]' : 'h-[60px]'}`}>
+                <form onSubmit={handleSearch} className="absolute inset-x-0 top-0 z-10">
+                  <div className="relative flex items-center h-[60px] px-6">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="What do you need help with?"
+                      className="w-full text-lg bg-transparent
+                               focus:outline-none placeholder-gray-400"
+                    />
+                    <button
+                      type="submit"
+                      className="flex-shrink-0 bg-gradient-to-r from-pink to-yellow
+                               text-white px-6 py-2 rounded-full
+                               hover:opacity-90 transition-opacity ml-4"
+                    >
+                      <Search className="h-5 w-5" />
+                    </button>
+                  </div>
+                </form>
+
+                <div className={`absolute inset-x-0 top-[60px] bottom-0 
+                                transition-opacity duration-500
+                                ${showChat ? 'opacity-100' : 'opacity-0'}`}>
+                  {showChat && (
+                    <AIChatInterface
+                      initialQuery={searchQuery}
+                      onClose={() => {
+                        setShowChat(false)
+                        setSearchQuery('')
+                      }}
+                    />
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-
-          <div className={`space-y-6 transition-opacity duration-300 ${showChat ? 'hidden' : ''}`}>
-            <form onSubmit={handleSearch} className="relative max-w-3xl mx-auto">
-              <input
-                type="text"
-                placeholder="What kind of help do you need today?"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-8 py-6 text-2xl rounded-full border-2 border-gray-200
-                         focus:outline-none focus:border-pink shadow-lg
-                         placeholder-gray-400 transition-all duration-300
-                         hover:shadow-xl focus:shadow-xl"
-              />
-              <button
-                type="submit"
-                className="absolute right-4 top-1/2 -translate-y-1/2
-                         bg-pink text-white p-4 rounded-full
-                         hover:bg-pink-dark transition-all duration-300
-                         hover:scale-110 active:scale-95 hover:shadow-lg"
-              >
-                <Search className="h-7 w-7" />
-              </button>
-            </form>
 
             {/* Popular Searches */}
-            <div className="mt-4">
+            <div className={`mt-4 transition-opacity duration-300 ${showChat ? 'opacity-0' : 'opacity-100'}`}>
               <div className="flex items-center justify-center gap-2 text-gray-600 mb-4">
                 <TrendingUp className="h-5 w-5" />
                 <span>Popular in Community</span>
               </div>
+
               <div className="flex flex-wrap justify-center gap-3">
                 {popularSearches.map((search, index) => (
                   <button
@@ -126,19 +126,6 @@ export default function FindHelp() {
             </div>
           </div>
         </div>
-
-        {/* AI Chat Interface */}
-        {showChat && (
-          <div className="max-w-4xl mx-auto mt-8 animate-slideUp">
-            <AIChatInterface
-              initialMessage={`I need help with: ${searchQuery}`}
-              onClose={() => {
-                setShowChat(false)
-                setSearchQuery('')
-              }}
-            />
-          </div>
-        )}
       </div>
     </div>
   )
